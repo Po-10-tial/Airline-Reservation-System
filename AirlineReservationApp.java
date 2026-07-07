@@ -7,6 +7,9 @@ public class AirlineReservationApp {
     private final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
+        // Initialize SQLite failsafe (schema + warm cache + sync timer).
+        SqliteManager.initialize();
+
         if (args.length > 0 && "console".equalsIgnoreCase(args[0])) {
             new AirlineReservationApp().run();
         } else {

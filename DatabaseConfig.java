@@ -7,6 +7,9 @@ public class DatabaseConfig {
     public static final String DB_USER = "root";
     public static final String DB_PASSWORD = "1234567890";
 
+    /** SQLite fallback database — embedded file in the project directory. */
+    public static final String SQLITE_URL = "jdbc:sqlite:airline_backup.db";
+
     private DatabaseConfig() {
         // Prevent instantiation
     }

@@ -14,6 +14,7 @@ public class AirlineReservationUI {
     private CardLayout cardLayout;
     private JPanel cardsPanel;
     private JLabel statusLabel;
+    private JLabel connectionStatusLabel;
 
     private JTextField customerLoginEmailField;
     private JPasswordField customerLoginPasswordField;
@@ -116,6 +117,13 @@ public class AirlineReservationUI {
         frame.add(cardsPanel, BorderLayout.CENTER);
         frame.add(createStatusPanel(), BorderLayout.SOUTH);
         switchToCard(CARD_WELCOME);
+
+        // Register for database mode-change notifications.
+        updateConnectionStatus(DatabaseConnection.getActiveMode());
+        SqliteManager.setModeChangeListener(mode ->
+            SwingUtilities.invokeLater(() -> updateConnectionStatus(mode))
+        );
+
         frame.setVisible(true);
     }
 
@@ -577,21 +585,40 @@ public class AirlineReservationUI {
         JTextField cancelReservationField = new JTextField(14);
         JButton cancelButton = new JButton("Cancel Reservation");
         applyButtonStyle(cancelButton, new Color(229, 57, 53));
+
+        // Auto-fill reservation ID when a row is selected
+        reservationTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && reservationTable.getSelectedRow() >= 0) {
+                String resId = customerReservationTableModel.getValueAt(reservationTable.getSelectedRow(), 0).toString();
+                cancelReservationField.setText(resId);
+            }
+        });
+
         cancelButton.addActionListener(e -> {
             String reservationId = cancelReservationField.getText().trim();
             if (reservationId.isEmpty()) {
-                showMessage("Validation error", "Please enter a reservation ID.", JOptionPane.WARNING_MESSAGE);
+                showMessage("Validation error", "Please select a reservation from the table or enter a reservation ID.", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            if (service.cancelReservation(reservationId, currentUser.id())) {
-                refreshCustomerReservationTable();
-                refreshCustomerFlightTable(service.getAllFlights());
-                refreshOverview();
-                showMessage("Success", "Reservation cancelled successfully.", JOptionPane.INFORMATION_MESSAGE);
-                setStatus("Reservation " + reservationId + " cancelled.");
-                cancelReservationField.setText("");
-            } else {
-                showMessage("Cancel failed", "Unable to cancel reservation.", JOptionPane.ERROR_MESSAGE);
+            int confirm = JOptionPane.showConfirmDialog(frame,
+                    "Are you sure you want to cancel reservation " + reservationId + "?",
+                    "Confirm Cancellation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+            try {
+                if (service.cancelReservation(reservationId, currentUser.id())) {
+                    refreshCustomerReservationTable();
+                    refreshCustomerFlightTable(service.getAllFlights());
+                    refreshOverview();
+                    showMessage("Success", "Reservation cancelled successfully.", JOptionPane.INFORMATION_MESSAGE);
+                    setStatus("Reservation " + reservationId + " cancelled.");
+                    cancelReservationField.setText("");
+                } else {
+                    showMessage("Cancel failed", "Unable to cancel reservation. You may not have permission to cancel this reservation, or the reservation ID is invalid.", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception ex) {
+                showMessage("Cancel failed", "Error cancelling reservation: " + ex.getMessage(), JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -902,7 +929,21 @@ public class AirlineReservationUI {
         statusLabel = new JLabel("Ready.");
         statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(statusLabel, BorderLayout.WEST);
+
+        connectionStatusLabel = new JLabel();
+        connectionStatusLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        panel.add(connectionStatusLabel, BorderLayout.EAST);
         return panel;
+    }
+
+    private void updateConnectionStatus(DatabaseConnection.Mode mode) {
+        if (connectionStatusLabel == null) return;
+        if (mode == DatabaseConnection.Mode.MYSQL) {
+            connectionStatusLabel.setText("");
+        } else {
+            connectionStatusLabel.setText("\u25CF Offline (SQLite)");
+            connectionStatusLabel.setForeground(new Color(230, 126, 34)); // orange
+        }
     }
 
     private void handleCustomerLogin(ActionEvent ignored) {
