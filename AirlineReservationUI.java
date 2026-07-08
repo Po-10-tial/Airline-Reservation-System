@@ -550,9 +550,14 @@ public class AirlineReservationUI {
         configureTable(pendingTable);
         pendingTable.setPreferredScrollableViewportSize(new Dimension(0, 160));
 
-        JPanel formWrapper = new JPanel(new BorderLayout(0, 10));
+        JPanel formWrapper = new JPanel(new BorderLayout(20, 0));
         formWrapper.setOpaque(false);
-        formWrapper.add(bookingPanel, BorderLayout.NORTH);
+        
+        JPanel bookingWrapper = new JPanel(new BorderLayout());
+        bookingWrapper.setOpaque(false);
+        bookingWrapper.add(bookingPanel, BorderLayout.NORTH);
+        
+        formWrapper.add(bookingWrapper, BorderLayout.WEST);
         formWrapper.add(new JScrollPane(pendingTable), BorderLayout.CENTER);
 
         JScrollPane pageScroll = new JScrollPane(formWrapper);
@@ -738,19 +743,16 @@ public class AirlineReservationUI {
         formPanel.setOpaque(false);
         formPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(new Color(200, 211, 222)), "Flight Editor"));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(4, 10, 4, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
-
-        adminFlightNumberField = new JTextField(20);
-        adminOriginField = new JTextField(20);
-        adminDestinationField = new JTextField(20);
-        adminDepartField = new JTextField(20);
-        adminArriveField = new JTextField(20);
-        adminSeatsField = new JTextField(20);
-        adminPriceField = new JTextField(20);
+        adminFlightNumberField = new JTextField(12);
+        adminOriginField = new JTextField(12);
+        adminDestinationField = new JTextField(12);
+        adminDepartField = new JTextField(12);
+        adminArriveField = new JTextField(12);
+        adminSeatsField = new JTextField(12);
+        adminPriceField = new JTextField(12);
 
         addFieldToPanel(formPanel, labelWithFont("Flight #:"), adminFlightNumberField, gbc, 0);
         addFieldToPanel(formPanel, labelWithFont("Origin:"), adminOriginField, gbc, 1);
@@ -779,7 +781,12 @@ public class AirlineReservationUI {
 
         JPanel leftPanel = new JPanel(new BorderLayout(0, 16));
         leftPanel.setOpaque(false);
-        leftPanel.add(formPanel, BorderLayout.CENTER);
+        
+        JPanel formWrapper = new JPanel(new BorderLayout());
+        formWrapper.setOpaque(false);
+        formWrapper.add(formPanel, BorderLayout.NORTH);
+        
+        leftPanel.add(formWrapper, BorderLayout.CENTER);
         leftPanel.add(actionPanel, BorderLayout.SOUTH);
 
         panel.add(leftPanel, BorderLayout.WEST);
@@ -890,8 +897,13 @@ public class AirlineReservationUI {
         gbc.gridy = row;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
         panel.add(label, gbc);
+
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(field, gbc);
     }
 
