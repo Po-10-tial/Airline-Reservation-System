@@ -456,7 +456,12 @@ public class AirlineReservationUI {
         searchPanel.add(searchButton);
         searchPanel.add(refreshButton);
 
-        customerFlightTableModel = new DefaultTableModel(new Object[]{"Flight #", "Origin", "Destination", "Depart", "Arrive", "Seats", "Price"}, 0);
+        customerFlightTableModel = new DefaultTableModel(new Object[]{"Flight #", "Origin", "Destination", "Depart", "Arrive", "Seats", "Price"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         JTable flightTable = new JTable(customerFlightTableModel);
         configureTable(flightTable);
         flightTable.getSelectionModel().addListSelectionListener(e -> {
@@ -496,7 +501,7 @@ public class AirlineReservationUI {
         bookingPanel.setOpaque(false);
         bookingPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(new Color(200, 211, 222), 1), "Booking Details"));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 10, 6, 10);
+        gbc.insets = new Insets(2, 10, 2, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
         bookingFlightNumberField = new JTextField(14);
@@ -539,13 +544,17 @@ public class AirlineReservationUI {
         addPassengerButton.addActionListener(e -> handleAddPassenger());
         confirmBookingButton.addActionListener(e -> handleConfirmGroupBooking());
 
-        JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
+        JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 12));
         buttonBar.setOpaque(false);
         buttonBar.add(addPassengerButton);
         buttonBar.add(confirmBookingButton);
-        gbc.gridx = 0; gbc.gridy = 12; gbc.gridwidth = 2; bookingPanel.add(buttonBar, gbc);
 
-        pendingPassengerTableModel = new DefaultTableModel(new Object[]{"Name", "Type", "Passport", "Seat", "Class"}, 0);
+        pendingPassengerTableModel = new DefaultTableModel(new Object[]{"Name", "Type", "Passport", "Seat", "Class"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         JTable pendingTable = new JTable(pendingPassengerTableModel);
         configureTable(pendingTable);
         pendingTable.setPreferredScrollableViewportSize(new Dimension(0, 160));
@@ -567,19 +576,33 @@ public class AirlineReservationUI {
         pageScroll.getVerticalScrollBar().setUnitIncrement(16);
 
         panel.add(pageScroll, BorderLayout.CENTER);
+        panel.add(buttonBar, BorderLayout.SOUTH);
         return panel;
     }
 
     private JPanel createCustomerReservationsPanel() {
         JPanel panel = createContentPanel();
 
-        customerReservationTableModel = new DefaultTableModel(new Object[]{"Reservation #", "Flight #", "Seats", "Price", "Booked"}, 0);
+        customerReservationTableModel = new DefaultTableModel(new Object[]{"Reservation #", "Flight #", "Seats", "Price", "Booked"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         JTable reservationTable = new JTable(customerReservationTableModel);
         configureTable(reservationTable);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 12));
         bottomPanel.setOpaque(false);
         JTextField cancelReservationField = new JTextField(14);
+        
+        reservationTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && reservationTable.getSelectedRow() >= 0) {
+                String selectedReservationId = customerReservationTableModel.getValueAt(reservationTable.getSelectedRow(), 0).toString();
+                cancelReservationField.setText(selectedReservationId);
+            }
+        });
+
         JButton cancelButton = new JButton("Cancel Reservation");
         applyButtonStyle(cancelButton, new Color(229, 57, 53));
         cancelButton.addActionListener(e -> {
@@ -716,7 +739,12 @@ public class AirlineReservationUI {
     private JPanel createAdminFlightPanel() {
         JPanel panel = createContentPanel();
 
-        adminFlightTableModel = new DefaultTableModel(new Object[]{"Flight #", "Origin", "Destination", "Depart", "Arrive", "Seats", "Price"}, 0);
+        adminFlightTableModel = new DefaultTableModel(new Object[]{"Flight #", "Origin", "Destination", "Depart", "Arrive", "Seats", "Price"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         JTable flightTable = new JTable(adminFlightTableModel);
         configureTable(flightTable);
 
@@ -799,7 +827,12 @@ public class AirlineReservationUI {
     private JPanel createAdminReservationPanel() {
         JPanel panel = createContentPanel();
 
-        adminReservationTableModel = new DefaultTableModel(new Object[]{"Reservation #", "Flight #", "Passenger", "Seats", "Price", "Booked"}, 0);
+        adminReservationTableModel = new DefaultTableModel(new Object[]{"Reservation #", "Flight #", "Passenger", "Seats", "Price", "Booked"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         JTable reservationTable = new JTable(adminReservationTableModel);
         configureTable(reservationTable);
 
@@ -821,7 +854,12 @@ public class AirlineReservationUI {
         top.add(adminCustomerSearchField);
         top.add(searchButton);
 
-        adminCustomerTableModel = new DefaultTableModel(new Object[]{"Customer ID", "Name", "Email", "Phone"}, 0);
+        adminCustomerTableModel = new DefaultTableModel(new Object[]{"Customer ID", "Name", "Email", "Phone"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         JTable customerTable = new JTable(adminCustomerTableModel);
         configureTable(customerTable);
 
